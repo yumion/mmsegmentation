@@ -69,6 +69,11 @@ def main():
         cfg.work_dir = osp.join('./work_dirs',
                                 osp.splitext(osp.basename(args.config))[0])
 
+    # change dump_path of parent directory to work_dir
+    cfg.train_dataloader.dataset = change_dump_path(cfg.train_dataloader.dataset, cfg.work_dir)
+    cfg.val_dataloader.dataset = change_dump_path(cfg.val_dataloader.dataset, cfg.work_dir)
+    cfg.test_dataloader.dataset = change_dump_path(cfg.test_dataloader.dataset, cfg.work_dir)
+
     # enable automatic-mixed-precision training
     if args.amp is True:
         optim_wrapper = cfg.optim_wrapper.type
@@ -98,6 +103,22 @@ def main():
 
     # start training
     runner.train()
+
+
+def change_dump_path(cfg_data, parent_dir):
+    # in case of Concat dataset
+    if isinstance(cfg_data, list):
+        for i, ds in enumerate(cfg_data):
+            if ds.get('dump_path') and not osp.isabs(ds['dump_path']):
+                cfg_data[i].dump_path = osp.join(parent_dir, ds.dump_path)
+    elif cfg_data.type == 'ConcatDataset':
+        for i, ds in enumerate(cfg_data.datasets):
+            if ds.get('dump_path') and not osp.isabs(ds['dump_path']):
+                cfg_data.datasets[i].dump_path = osp.join(parent_dir, ds.dump_path)
+    # in case of single dataset
+    elif cfg_data.get('dump_path') and not osp.isabs(cfg_data['dump_path']):
+        cfg_data.dump_path = osp.join(parent_dir, cfg_data.dump_path)
+    return cfg_data
 
 
 if __name__ == '__main__':

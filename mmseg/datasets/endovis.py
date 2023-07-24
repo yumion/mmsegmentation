@@ -1,4 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
+import csv
+import json
 from pathlib import Path
 from typing import List, Optional
 
@@ -36,6 +38,7 @@ class EndoVisDataset(BaseSegDataset):
         img_suffix: str = ".png",
         seg_map_suffix: str = ".png",
         data_root: Optional[str] = None,
+        dump_path: Optional[str] = None,
         **kwargs,
     ) -> None:
         # ignore `_join_prefix()`
@@ -50,6 +53,10 @@ class EndoVisDataset(BaseSegDataset):
         self.data_root = Path(data_root if data_root is not None else "")
         if not kwargs.get("lazy_init", False):
             self.full_init()
+
+        if dump_path is not None:
+            dump_path = Path(dump_path)
+            self.dump_annotations(dump_path)
 
     def load_data_list(self) -> List[dict]:
         """Load annotation from directory or annotation file.
@@ -86,7 +93,7 @@ class EndoVisDataset(BaseSegDataset):
                             data_info.update(
                                 seg_map_path=(data_root / ann_dir / img_name).with_suffix(self.seg_map_suffix),
                             )
-                        pbar.set_postfix(data_info)
+                        # pbar.set_postfix(data_info)
                         data_list.append(data_info)
         # in case dataset were splitted train/val directory
         else:
@@ -107,8 +114,20 @@ class EndoVisDataset(BaseSegDataset):
                                 self.seg_map_suffix
                             )
                         )
-                    pbar.set_postfix(data_info)
+                    # pbar.set_postfix(data_info)
                     data_list.append(data_info)
         data_list = sorted(data_list, key=lambda x: x["img_path"])
-        print_log(f'Loaded {len(data_list)} images', logger="current", level=logging.INFO)
+        print_log(f"Loaded {len(data_list)} images", logger="current", level=logging.INFO)
         return data_list
+
+    def dump_annotations(self, dump_path: Path, label_map_file: str = "metainfo.json") -> None:
+        annotations = []
+        for idx in range(len(self)):
+            data_info = self.get_data_info(idx)
+            annotations.append([str(data_info["img_path"]), str(data_info["seg_map_path"])])
+        with open(dump_path, "w") as fw:
+            writer = csv.writer(fw)
+            writer.writerows(annotations)
+        with open(dump_path.parent / label_map_file, "w") as fw:
+            json.dump(self._metainfo, fw, indent=4)
+        print_log(f"Dumped annotations to {dump_path}", logger="current", level=logging.INFO)

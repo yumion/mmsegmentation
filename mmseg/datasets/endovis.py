@@ -34,7 +34,7 @@ class EndoVisDataset(BaseSegDataset):
 
     def __init__(
         self,
-        ann_file: Optional[str] = None,
+        ann_file: str = "",
         img_suffix: str = ".png",
         seg_map_suffix: str = ".png",
         data_root: Optional[str] = None,
@@ -116,6 +116,9 @@ class EndoVisDataset(BaseSegDataset):
                         )
                     # pbar.set_postfix(data_info)
                     data_list.append(data_info)
+
+        assert data_list, f"ERROR: There is no data for loading. Is the data path wrong?: {self.data_root}"
+
         data_list = sorted(data_list, key=lambda x: x["img_path"])
         print_log(f"Loaded {len(data_list)} images", logger="current", level=logging.INFO)
         return data_list

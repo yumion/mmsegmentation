@@ -105,19 +105,18 @@ def main():
     runner.train()
 
 
-def change_dump_path(cfg_data, parent_dir):
+def change_dump_path(cfg_data, parent_dir="", is_dump=True):
     # in case of Concat dataset
     if isinstance(cfg_data, list):
         for i, ds in enumerate(cfg_data):
             if ds.get('dump_path') and not osp.isabs(ds['dump_path']):
-                cfg_data[i].dump_path = osp.join(parent_dir, ds.dump_path)
+                cfg_data[i].dump_path = osp.join(parent_dir, ds.dump_path) if is_dump else None
     elif cfg_data.type == 'ConcatDataset':
         for i, ds in enumerate(cfg_data.datasets):
             if ds.get('dump_path') and not osp.isabs(ds['dump_path']):
-                cfg_data.datasets[i].dump_path = osp.join(parent_dir, ds.dump_path)
-    # in case of single dataset
+                cfg_data.datasets[i].dump_path = osp.join(parent_dir, ds.dump_path) if is_dump else None
     elif cfg_data.get('dump_path') and not osp.isabs(cfg_data['dump_path']):
-        cfg_data.dump_path = osp.join(parent_dir, cfg_data.dump_path)
+        cfg_data.dump_path = osp.join(parent_dir, cfg_data.dump_path) if is_dump else None
     return cfg_data
 
 

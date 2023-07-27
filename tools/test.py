@@ -31,6 +31,8 @@ def parse_args():
     parser.add_argument(
         '--wait-time', type=float, default=2, help='the interval of show (s)')
     parser.add_argument(
+        '--interval', type=int, default=50, help='The interval of visualization.')
+    parser.add_argument(
         '--cfg-options',
         nargs='+',
         action=DictAction,
@@ -64,6 +66,7 @@ def trigger_visualization_hook(cfg, args):
         visualization_hook = default_hooks['visualization']
         # Turn on visualization
         visualization_hook['draw'] = True
+        visualization_hook['interval'] = args.interval
         if args.show:
             visualization_hook['show'] = True
             visualization_hook['wait_time'] = args.wait_time
@@ -87,6 +90,11 @@ def main():
     cfg.launcher = args.launcher
     if args.cfg_options is not None:
         cfg.merge_from_dict(args.cfg_options)
+
+    # doesn't dump annotation csv
+    cfg.train_dataloader.dataset = change_dump_path(cfg.train_dataloader.dataset, is_dump=False)
+    cfg.val_dataloader.dataset = change_dump_path(cfg.val_dataloader.dataset, is_dump=False)
+    cfg.test_dataloader.dataset = change_dump_path(cfg.test_dataloader.dataset, is_dump=False)
 
     # work_dir is determined in this priority: CLI > segment in file > filename
     if args.work_dir is not None:
@@ -117,6 +125,21 @@ def main():
 
     # start testing
     runner.test()
+
+
+def change_dump_path(cfg_data, parent_dir="", is_dump=True):
+    # in case of Concat dataset
+    if isinstance(cfg_data, list):
+        for i, ds in enumerate(cfg_data):
+            if ds.get('dump_path') and not osp.isabs(ds['dump_path']):
+                cfg_data[i].dump_path = osp.join(parent_dir, ds.dump_path) if is_dump else None
+    elif cfg_data.type == 'ConcatDataset':
+        for i, ds in enumerate(cfg_data.datasets):
+            if ds.get('dump_path') and not osp.isabs(ds['dump_path']):
+                cfg_data.datasets[i].dump_path = osp.join(parent_dir, ds.dump_path) if is_dump else None
+    elif cfg_data.get('dump_path') and not osp.isabs(cfg_data['dump_path']):
+        cfg_data.dump_path = osp.join(parent_dir, cfg_data.dump_path) if is_dump else None
+    return cfg_data
 
 
 if __name__ == '__main__':

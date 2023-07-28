@@ -32,7 +32,7 @@ RUN ["/bin/bash", "-c", "mim install mmcv==${MMCV}"]
 RUN ["/bin/bash", "-c", "mim install mmdet>=3.0.0rc4"]
 
 # Install MMSegmentation
-RUN git clone -b main https://github.com/open-mmlab/mmsegmentation.git /mmsegmentation
+RUN git clone -b main https://github.com/yumion/mmsegmentation.git /mmsegmentation
 WORKDIR /mmsegmentation
 RUN pip install -r requirements.txt
 RUN pip install -r requirements/albu.txt

@@ -74,7 +74,7 @@ class MMSegInferencer(BaseInferencer):
         # naming of the output images
         self.num_visualized_imgs = 0
         self.num_pred_imgs = 0
-        init_default_scope(scope if scope else 'mmseg')
+        init_default_scope(scope or 'mmseg')
         super().__init__(
             model=model, weights=weights, device=device, scope=scope)
 

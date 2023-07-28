@@ -8,6 +8,7 @@ CUDA_VISIBLE_DEVICES=$GPU \
 python $(dirname "$0")/test.py \
     $CONFIG \
     $CHECKPOINT \
+    --work-dir $WORK_DIR \
     --show-dir $WORK_DIR \
     --out $WORK_DIR/pred \
     --launcher pytorch \

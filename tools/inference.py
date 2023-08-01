@@ -218,6 +218,5 @@ class MMSegInferencer:
         return tensor.cpu().detach().numpy().astype(np.uint8)
 
 
-
 if __name__ == "__main__":
     main()

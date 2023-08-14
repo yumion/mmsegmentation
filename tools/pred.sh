@@ -11,5 +11,5 @@ python $(dirname "$0")/inference.py \
     $CHECKPOINT \
     0 \
     --target-dir "$TARGET_DIR" \
-    --out $WORK_DIR/pred
+    --out $WORK_DIR/endovis2023/pred
     ${@:5}

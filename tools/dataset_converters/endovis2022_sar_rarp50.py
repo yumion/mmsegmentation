@@ -13,8 +13,8 @@ def main():
         # 3: 3,  # shaft
         4: 0,  # needle
         5: 0,  # thread
-        6: 2,  # suction
-        7: 2,  # needle holder
+        6: 3,  # suction
+        7: 3,  # needle holder
         8: 0,  # clamps
         9: 0,  # catheter
     }

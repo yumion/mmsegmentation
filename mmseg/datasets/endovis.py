@@ -68,9 +68,10 @@ class EndoVisSynISSDataset(BaseSegDataset):
         img_dir = self.data_prefix.get("img_path", None)
         ann_dir = self.data_prefix.get("seg_map_path", None)
         if ann_dir is not None:
-            find_pattern = f"{ann_dir}/*{self.seg_map_suffix}"
+            find_pattern_img = f"{img_dir}/*-*{self.seg_map_suffix}"
+            find_pattern_anno = f"{ann_dir}/*-*{self.seg_map_suffix}"
         else:
-            find_pattern = f"{img_dir}/*{self.img_suffix}"
+            find_pattern_anno = f"{img_dir}/*-*{self.img_suffix}"
         # in case there is train/val split text files
         ann_file = self.data_root / self.ann_file
         if not ann_file.is_dir() and self.ann_file:
@@ -79,7 +80,7 @@ class EndoVisSynISSDataset(BaseSegDataset):
             for line in lines:
                 video_name = line.strip()
                 data_root = self.data_root / video_name
-                with tqdm(data_root.glob(find_pattern)) as pbar:
+                with tqdm(data_root.glob(find_pattern_anno)) as pbar:
                     for data_file in pbar:
                         img_name = data_file.stem
                         pbar.set_description(f"loading: {video_name}/{img_name}")
@@ -97,25 +98,46 @@ class EndoVisSynISSDataset(BaseSegDataset):
                         data_list.append(data_info)
         # in case dataset were splitted train/val directory
         else:
-            with tqdm(self.data_root.glob(f"*/{find_pattern}")) as pbar:
-                for data_file in pbar:
-                    img_name = data_file.stem
-                    video_name = data_file.parts[-3]
-                    pbar.set_description(f"loading: {video_name}/{img_name}")
+            with tqdm(self.data_root.glob(f"{find_pattern_img}")) as pbar:
+                anno_list = list(self.data_root.glob(f"{find_pattern_anno}"))
+                for img_file, anno_file in zip(pbar, anno_list):
+                    img_name = img_file.stem
+                    # video_name = data_file.parts[-3]
+                    # pbar.set_description(f"loading: {video_name}/{img_name}")
+                    pbar.set_description(f"loading: {img_name}")
                     data_info = dict(
-                        img_path=(self.data_root / video_name / img_dir / img_name).with_suffix(self.img_suffix),
+                        # img_path=(self.data_root / video_name / img_dir / img_name).with_suffix(self.img_suffix),
+                        img_path=(self.data_root / img_dir / img_name).with_suffix(self.img_suffix),
                         label_map=self.label_map,
                         reduce_zero_label=self.reduce_zero_label,
                         seg_fields=[],
                     )
-                    if ann_dir is not None:
-                        data_info.update(
-                            seg_map_path=(self.data_root / video_name / ann_dir / img_name).with_suffix(
-                                self.seg_map_suffix
-                            )
+                    ann_name = anno_file.stem
+                    # video_name = data_file.parts[-3]
+                    # pbar.set_description(f"loading: {video_name}/{ann_name}")
+                    pbar.set_description(f"loading: {ann_name}")
+                    data_info.update(
+                        # img_path=(self.data_root / video_name / img_dir / ann_name).with_suffix(self.img_suffix),
+                        seg_map_path=(self.data_root / ann_dir / ann_name).with_suffix(
+                            self.seg_map_suffix
                         )
-                    # pbar.set_postfix(data_info)
+                    )
                     data_list.append(data_info)
+            
+            # with tqdm(self.data_root.glob(f"{find_pattern_anno}")) as pbar:
+            #     for data_file in pbar:
+                    
+            
+
+            #         if ann_dir is not None:
+            #             data_info.update(
+            #                 # seg_map_path=(self.data_root / video_name / ann_dir / img_name).with_suffix(
+            #                 seg_map_path=(self.data_root / ann_dir / img_name).with_suffix(
+            #                     self.seg_map_suffix
+            #                 )
+            #             )
+            #         # pbar.set_postfix(data_info)
+            #         data_list.append(data_info)
 
         assert data_list, f"ERROR: There is no data for loading. Is the data path wrong?: {self.data_root}"
 

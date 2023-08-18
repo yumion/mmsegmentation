@@ -12,8 +12,8 @@ num_epochs = 30
 warmup_ratio = 0.01
 
 dataset_type = "EndoVisSynISSDataset"
-train_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset-1/train"
-val_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset-1/test"
+train_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset-1/train/"
+val_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset-1/test/"
 
 # dataset settings
 data_preprocessor = dict(

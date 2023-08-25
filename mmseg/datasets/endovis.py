@@ -26,9 +26,9 @@ class EndoVisSynISSDataset(BaseSegDataset):
         ),
         palette=[
             [0, 0, 0],  # background
-            [49, 205, 49],  # clasper
-            [138, 0, 0],  # wrist
-            [255, 214, 0],  # shaft
+            [0, 255, 255],  # clasper
+            [255, 255, 0],  # wrist
+            [0, 255, 0],  # shaft
         ],
     )
 
@@ -98,31 +98,35 @@ class EndoVisSynISSDataset(BaseSegDataset):
                         data_list.append(data_info)
         # in case dataset were splitted train/val directory
         else:
-            with tqdm(self.data_root.glob(f"{find_pattern_img}")) as pbar:
-                anno_list = list(self.data_root.glob(f"{find_pattern_anno}"))
-                for img_file, anno_file in zip(pbar, anno_list):
+            with tqdm(sorted(self.data_root.glob(f"{find_pattern_img}"))) as pbar:
+                ann_list = sorted(list(self.data_root.glob(f"{find_pattern_anno}")))
+                for img_file in pbar:
                     img_name = img_file.stem
-                    # video_name = data_file.parts[-3]
-                    # pbar.set_description(f"loading: {video_name}/{img_name}")
-                    pbar.set_description(f"loading: {img_name}")
-                    data_info = dict(
-                        # img_path=(self.data_root / video_name / img_dir / img_name).with_suffix(self.img_suffix),
-                        img_path=(self.data_root / img_dir / img_name).with_suffix(self.img_suffix),
-                        label_map=self.label_map,
-                        reduce_zero_label=self.reduce_zero_label,
-                        seg_fields=[],
-                    )
-                    ann_name = anno_file.stem
-                    # video_name = data_file.parts[-3]
-                    # pbar.set_description(f"loading: {video_name}/{ann_name}")
-                    pbar.set_description(f"loading: {ann_name}")
-                    data_info.update(
-                        # img_path=(self.data_root / video_name / img_dir / ann_name).with_suffix(self.img_suffix),
-                        seg_map_path=(self.data_root / ann_dir / ann_name).with_suffix(
-                            self.seg_map_suffix
-                        )
-                    )
-                    data_list.append(data_info)
+                    img_name_main = img_name[2:]
+                    for ann_file in ann_list:
+                        ann_name = ann_file.stem
+                        ann_name_main = ann_name[2:]
+                        if img_name_main == ann_name_main:
+                            # video_name = data_file.parts[-3]
+                            # pbar.set_description(f"loading: {video_name}/{img_name}")
+                            pbar.set_description(f"loading: {img_name}")
+                            data_info = dict(
+                                # img_path=(self.data_root / video_name / img_dir / img_name).with_suffix(self.img_suffix),
+                                img_path=(self.data_root / img_dir / img_name).with_suffix(self.img_suffix),
+                                label_map=self.label_map,
+                                reduce_zero_label=self.reduce_zero_label,
+                                seg_fields=[],
+                            )
+                            # video_name = data_file.parts[-3]
+                            # pbar.set_description(f"loading: {video_name}/{ann_name}")
+                            pbar.set_description(f"loading: {ann_name}")
+                            data_info.update(
+                                # img_path=(self.data_root / video_name / img_dir / ann_name).with_suffix(self.img_suffix),
+                                seg_map_path=(self.data_root / ann_dir / ann_name).with_suffix(
+                                    self.seg_map_suffix
+                                )
+                            )
+                            data_list.append(data_info)
             
             # with tqdm(self.data_root.glob(f"{find_pattern_anno}")) as pbar:
             #     for data_file in pbar:

@@ -6,14 +6,16 @@ _base_ = [
 # load_from = "https://download.openmmlab.com/mmsegmentation/v0.5/mask2former/mask2former_swin-b-in22k-384x384-pre_8xb2-160k_ade20k-640x640/mask2former_swin-b-in22k-384x384-pre_8xb2-160k_ade20k-640x640_20221203_235230-622e093b.pth"  # noqa
 load_from = "/data2/src/atsushi/mmsegmentation/work_dirs/mask2former_swin-b-in22k-384x384-pre_sarrarp50_endovis20172018-1333x750_lr1e-5/best_mIoU_epoch_20.pth"
 
-num_classes = 2
+num_classes = 4
 crop_size = (540, 960)  # height, width
+# crop_size = (750, 1333)  # height, width
+
 num_epochs = 30
 warmup_ratio = 0.01
 
 dataset_type = "EndoVisSynISSDataset"
-train_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset-1/train"
-val_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset-1/test"
+train_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset-1/train/"
+val_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset-1/test/"
 
 # dataset settings
 data_preprocessor = dict(
@@ -28,7 +30,7 @@ data_preprocessor = dict(
 train_pipeline = [
     dict(type="LoadImageFromFile"),
     dict(type="LoadAnnotations"),
-    dict(type="RandomResize", scale=(1920, 640), ratio_range=(0.5, 2.0), keep_ratio=True),
+    dict(type="RandomResize", scale=(960, 540), ratio_range=(0.5, 2.0), keep_ratio=True),
     dict(type="RandomCrop", crop_size=crop_size, cat_max_ratio=0.75),
     dict(type="RandomFlip", prob=0.5),
     dict(type="PhotoMetricDistortion"),
@@ -36,7 +38,7 @@ train_pipeline = [
 ]
 test_pipeline = [
     dict(type="LoadImageFromFile"),
-    dict(type="Resize", scale=(1920, 1080), keep_ratio=True),
+    dict(type="Resize", scale=(960, 540), keep_ratio=True),
     # add loading annotation after ``Resize`` because ground truth
     # does not need to do resize data transform
     dict(type="LoadAnnotations"),
@@ -44,24 +46,14 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=16,
+    batch_size=4,
     num_workers=16,
     persistent_workers=True,
     sampler=dict(type="DefaultSampler", shuffle=True),
     dataset=dict(
         type=dataset_type,
         data_root=train_data_root,
-        data_prefix=dict(img_path="binary_masks", seg_map_path="images"),
-        metainfo=dict(
-            classes=(
-                "background",
-                "instrument",
-            ),
-            palette=[
-                [0, 0, 0],  # background
-                [255, 255, 255],  # instrument
-            ],
-        ),
+        data_prefix=dict(img_path="images", seg_map_path="3colors_masks_palette"),
         # ann_file="train_video.txt",
         # dump_path="train_files.csv",
         pipeline=train_pipeline,
@@ -75,17 +67,7 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=val_data_root,
-        data_prefix=dict(img_path="binary_masks", seg_map_path="images"),
-        metainfo=dict(
-            classes=(
-                "background",
-                "instrument",
-            ),
-            palette=[
-                [0, 0, 0],  # background
-                [255, 255, 255],  # instrument
-            ],
-        ),
+        data_prefix=dict(img_path="images", seg_map_path="3colors_masks_palette"),
         # ann_file="val_video.txt",
         # dump_path="validation_files.csv",
         pipeline=test_pipeline,
@@ -106,7 +88,7 @@ default_hooks = dict(
     param_scheduler=dict(type="ParamSchedulerHook"),
     checkpoint=dict(type="CheckpointHook", by_epoch=True, interval=1, max_keep_ckpts=1, save_best="mIoU"),
     sampler_seed=dict(type="DistSamplerSeedHook"),
-    visualization=dict(type="SegVisualizationHook", ),
+    visualization=dict(type="SegVisualizationHook", draw=True, interval=50),
 )
 
 # Default setting for scaling LR automatically

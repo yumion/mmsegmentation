@@ -20,7 +20,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description="MMSeg inferencer model")
     parser.add_argument("config", type=Path, help="train config file path")
     parser.add_argument("checkpoint", type=Path, help="checkpoint file")
-    parser.add_argument("device", type=int, default=0, help="device used for inference. `-1` means using cpu.")
+    parser.add_argument(
+        "device", type=int, default=0, help="device used for inference. `-1` means using cpu."
+    )
     parser.add_argument(
         "--target-dir",
         type=str,
@@ -49,7 +51,12 @@ def parse_args():
         "Note that the quotation marks are necessary and that no white space "
         "is allowed.",
     )
-    parser.add_argument("--launcher", choices=["none", "pytorch", "slurm", "mpi"], default="none", help="job launcher")
+    parser.add_argument(
+        "--launcher",
+        choices=["none", "pytorch", "slurm", "mpi"],
+        default="none",
+        help="job launcher",
+    )
     parser.add_argument("--tta", action="store_true", help="Test time augmentation")
     # When using PyTorch version >= 2.0.0, the `torch.distributed.launch`
     # will pass the `--local-rank` parameter to `tools/train.py` instead
@@ -63,7 +70,9 @@ def parse_args():
 
 def main() -> None:
     args = parse_args()
-    assert args.show_dir is not None or args.out is not None, "Either --show-dir or --out should be specified."
+    assert (
+        args.show_dir is not None or args.out is not None
+    ), "Either --show-dir or --out should be specified."
 
     model = MMSegInferencer(
         config=args.config,
@@ -77,9 +86,12 @@ def main() -> None:
     with tqdm(sorted(glob(f"{args.target_dir}/*.png", recursive=True))) as pbar:
         for img_path in pbar:
             img_path = Path(img_path)
+
             # inputの画像のフォルダ構成を保ったまま保存する
-            parent_dir = Path(str(img_path.parent).replace(args.target_dir.split("*")[0], ""))
-            pbar.set_description(f"{parent_dir / img_path.name}")
+            parent_dir = img_path.parent.name
+            if "*" in args.target_dir:
+                parent_dir = str(img_path.parent).replace(args.target_dir.split("*")[0], "")
+            pbar.set_description(f"{parent_dir}/{img_path.name}")
 
             result = model(str(img_path))
             mask_p = model.putpalette(result)  # PIL palette
@@ -87,13 +99,13 @@ def main() -> None:
 
             verbose = {}
             if args.out is not None:
-                out_dir = args.out / parent_dir
+                out_dir = args.out / parent_dir / "preds"
                 out_dir.mkdir(parents=True, exist_ok=True)
                 mask_p.save(out_dir / img_path.name)
                 verbose["pred"] = str(out_dir / img_path.name)
 
             if args.show_dir is not None:
-                show_dir = args.show_dir / parent_dir
+                show_dir = args.show_dir / parent_dir / "vis"
                 show_dir.mkdir(parents=True, exist_ok=True)
                 cv2.imwrite(str(show_dir / img_path.name), blend)
                 verbose["show"] = str(show_dir / img_path.name)
@@ -124,14 +136,18 @@ class MMSegInferencer:
         result = self.postprocess(result)
         return result
 
-    def postprocess(self, result: Union[SegDataSample, SampleList]) -> Union[SegDataSample, SampleList]:
+    def postprocess(
+        self, result: Union[SegDataSample, SampleList]
+    ) -> Union[SegDataSample, SampleList]:
         mask = self._get_pred_mask(result)
         # TODO: 小さい面積削除の後処理
         # TODO: binary maskにしてerode->孤立点を削除する
         result.update(PixelData(data=torch.from_numpy(mask).unsqueeze(0).to(self.device)))
         return result
 
-    def overlay(self, result: SegDataSample, alpha: float = 0.3, rgb_to_bgr: bool = False) -> np.ndarray:
+    def overlay(
+        self, result: SegDataSample, alpha: float = 0.3, rgb_to_bgr: bool = False
+    ) -> np.ndarray:
         image = self._get_input_image(result)
         g_mask = self._get_pred_mask(result)
 
@@ -193,7 +209,9 @@ class MMSegInferencer:
             return [self._read_image(image, bgr_to_rgb) for image in images]
         raise ValueError(f"Invalid type of result: {type(result)}")
 
-    def _get_pred_mask(self, result: Union[SegDataSample, SampleList]) -> Union[np.ndarray, Sequence[np.ndarray]]:
+    def _get_pred_mask(
+        self, result: Union[SegDataSample, SampleList]
+    ) -> Union[np.ndarray, Sequence[np.ndarray]]:
         if isinstance(result, SegDataSample):
             pred_mask = result.pred_sem_seg.data[0]
             return self._tensor2numpy(pred_mask)
@@ -202,7 +220,9 @@ class MMSegInferencer:
             return [self._tensor2numpy(pred_mask.data[0]) for pred_mask in pred_masks]
         raise ValueError(f"Invalid type of result: {type(result)}")
 
-    def _read_image(self, image: Union[np.ndarray, str, Path], bgr_to_rgb: bool = True) -> np.ndarray:
+    def _read_image(
+        self, image: Union[np.ndarray, str, Path], bgr_to_rgb: bool = True
+    ) -> np.ndarray:
         if isinstance(image, np.ndarray):
             if bgr_to_rgb:
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

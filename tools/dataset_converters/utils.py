@@ -5,9 +5,12 @@ from tqdm import tqdm
 
 
 def generate_palette(label, cmap, palette):
+    # print("label:", np.unique(label))
     seg_map = np.zeros_like(label)
     for label_id, palette_id in cmap.items():
+        # print("before:", np.unique(seg_map))
         seg_map += np.where(np.asarray(label) == label_id, palette_id, 0).astype(seg_map.dtype)
+        # print("after:", np.unique(seg_map))
     seg_img = Image.fromarray(seg_map).convert("P")
     seg_img.putpalette(np.array(palette, dtype=np.uint8))
     return seg_img

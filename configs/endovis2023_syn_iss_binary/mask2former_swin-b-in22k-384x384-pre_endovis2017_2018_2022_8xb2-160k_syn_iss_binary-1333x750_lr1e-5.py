@@ -4,18 +4,18 @@ _base_ = [
 
 # pretrained = "https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/swin/swin_base_patch4_window12_384_22k_20220317-e5c09f74.pth"  # noqa
 # load_from = "https://download.openmmlab.com/mmsegmentation/v0.5/mask2former/mask2former_swin-b-in22k-384x384-pre_8xb2-160k_ade20k-640x640/mask2former_swin-b-in22k-384x384-pre_8xb2-160k_ade20k-640x640_20221203_235230-622e093b.pth"  # noqa
-# load_from = "/data2/src/atsushi/mmsegmentation/work_dirs/mask2former_swin-b-in22k-384x384-pre_sarrarp50_endovis20172018-1333x750_lr1e-5/best_mIoU_epoch_20.pth"
-load_from = "/home/ishikawa/miccai_challenge_2023/Syn-ISS/work_dirs/mask2former_swin-b-in22k-384x384-pre_8xb2-160k_syn_iss_binary-1333x750/best_mIoU_epoch_20.pth"
+load_from = "/data2/src/atsushi/mmsegmentation/work_dirs/mask2former_swin-b-in22k-384x384-pre_sarrarp50_endovis20172018-1333x750_lr1e-5/best_mIoU_epoch_20.pth"
+# load_from = "/home/ishikawa/miccai_challenge_2023/Syn-ISS/work_dirs/mask2former_swin-b-in22k-384x384-pre_8xb2-160k_syn_iss_binary-1333x750/best_mIoU_epoch_20.pth"
 
-num_classes = 4
+num_classes = 2
 crop_size = (540, 960)  # height, width
 # crop_size = (750, 1333)  # height, width
 
 num_epochs = 30
 warmup_ratio = 0.01
 
-# dataset_type = "EndoVisSynISSDataset"
-train_data_root = "/data1/shared/miccai/"
+dataset_type = "EndoVisSynISSBinaryDataset"
+train_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset_all/train/"
 val_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset_all/test/"
 
 # dataset settings
@@ -45,57 +45,30 @@ test_pipeline = [
     dict(type="LoadAnnotations"),
     dict(type="PackSegInputs"),
 ]
-
 train_dataloader = dict(
     batch_size=4,
     num_workers=16,
     persistent_workers=True,
     sampler=dict(type="DefaultSampler", shuffle=True),
     dataset=dict(
-        type="ConcatDataset",
-        datasets=[
-            dict(
-                type="EndoVisSynISSDataset",
-                data_root="/data1/shared/miccai/" + "EndoVis2023/Syn-ISS/dataset_all/train/",
-                data_prefix=dict(img_path="images", seg_map_path="3colors_masks_palette"),
-                # ann_file="train_video.txt",
-                # dump_path="train_files.csv",
-                pipeline=train_pipeline,
-            ),
-            dict(
-                type="EndoVisDataset",
-                data_root="/data2/shared/miccai" + "/EndoVis2017/train",
-                data_prefix=dict(img_path="left_frames", seg_map_path="3colors"),
-                dump_path="train_files_2017.csv",
-                pipeline=train_pipeline,
-            ),
-            dict(
-                type="EndoVisDataset",
-                data_root="/data2/shared/miccai" + "/EndoVis2018/train",
-                data_prefix=dict(img_path="left_frames", seg_map_path="3colors"),
-                dump_path="train_files_2018.csv",
-                pipeline=train_pipeline,
-            ),
-            dict(
-                type="EndoVisDataset",
-                data_root="/data2/shared/miccai/EndoVis2022/train",
-                data_prefix=dict(img_path="rgb", seg_map_path="3colors"),
-                ann_file="train_video.txt",
-                dump_path="train_files.csv",
-                pipeline=train_pipeline,
-            ),
-        ],
+        type=dataset_type,
+        data_root=train_data_root,
+        data_prefix=dict(img_path="images", seg_map_path="binary_masks_palette"),
+        # ann_file="train_video.txt",
+        # dump_path="train_files.csv",
+        pipeline=train_pipeline,
     ),
 )
+
 val_dataloader = dict(
     batch_size=1,
     num_workers=16,
     persistent_workers=True,
     sampler=dict(type="DefaultSampler", shuffle=False),
     dataset=dict(
-        type="EndoVisSynISSDataset",
+        type=dataset_type,
         data_root=val_data_root,
-        data_prefix=dict(img_path="images", seg_map_path="3colors_masks_palette"),
+        data_prefix=dict(img_path="images", seg_map_path="binary_masks_palette"),
         # ann_file="val_video.txt",
         # dump_path="validation_files.csv",
         pipeline=test_pipeline,
@@ -156,7 +129,7 @@ custom_keys.update(
     {f"backbone.stages.{stage_id}.downsample.norm": backbone_norm_multi for stage_id in range(len(depths) - 1)}
 )
 # optimizer
-optimizer = dict(type="AdamW", lr=0.001, weight_decay=0.005, eps=1e-8, betas=(0.9, 0.999))
+optimizer = dict(type="AdamW", lr=0.00001, weight_decay=0.005, eps=1e-8, betas=(0.9, 0.999))
 optim_wrapper = dict(
     type="OptimWrapper",
     optimizer=optimizer,

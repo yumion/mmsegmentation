@@ -4,18 +4,18 @@ _base_ = [
 
 # pretrained = "https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/swin/swin_base_patch4_window12_384_22k_20220317-e5c09f74.pth"  # noqa
 # load_from = "https://download.openmmlab.com/mmsegmentation/v0.5/mask2former/mask2former_swin-b-in22k-384x384-pre_8xb2-160k_ade20k-640x640/mask2former_swin-b-in22k-384x384-pre_8xb2-160k_ade20k-640x640_20221203_235230-622e093b.pth"  # noqa
-load_from = "/data2/src/atsushi/mmsegmentation/work_dirs/mask2former_swin-b-in22k-384x384-pre_sarrarp50_endovis20172018-1333x750_lr1e-5/best_mIoU_epoch_20.pth"
+# load_from = "/data2/src/atsushi/mmsegmentation/work_dirs/mask2former_swin-b-in22k-384x384-pre_sarrarp50_endovis20172018-1333x750_lr1e-5/best_mIoU_epoch_20.pth"
 
-num_classes = 4
+num_classes = 2
 crop_size = (540, 960)  # height, width
 # crop_size = (750, 1333)  # height, width
 
 num_epochs = 30
 warmup_ratio = 0.01
 
-dataset_type = "EndoVisSynISSDataset"
-train_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset-1/train/"
-val_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset-1/test/"
+dataset_type = "EndoVisSynISSBinaryDataset"
+train_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset_all/train/"
+val_data_root = "/data1/shared/miccai/EndoVis2023/Syn-ISS/dataset_all/test/"
 
 # dataset settings
 data_preprocessor = dict(
@@ -53,7 +53,7 @@ train_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=train_data_root,
-        data_prefix=dict(img_path="images", seg_map_path="3colors_masks_palette"),
+        data_prefix=dict(img_path="images", seg_map_path="binary_masks_palette"),
         # ann_file="train_video.txt",
         # dump_path="train_files.csv",
         pipeline=train_pipeline,
@@ -67,7 +67,7 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=val_data_root,
-        data_prefix=dict(img_path="images", seg_map_path="3colors_masks_palette"),
+        data_prefix=dict(img_path="images", seg_map_path="binary_masks_palette"),
         # ann_file="val_video.txt",
         # dump_path="validation_files.csv",
         pipeline=test_pipeline,

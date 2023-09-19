@@ -1,6 +1,7 @@
 CONTAINER_NAME=$1
 
 cd /data2/src/atsushi/mmsegmentation
+docker rm -f $CONTAINER_NAME && \
 docker run \
     --gpus all \
     --shm-size=64gb \

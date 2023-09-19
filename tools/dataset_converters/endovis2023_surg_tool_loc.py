@@ -30,7 +30,7 @@ def main():
         [0, 255, 0],  # shaft
     ]
 
-    parent_dir = Path("/data1/shared/miccai/EndoVis2023/SurgToolLoc/v1.0")
+    parent_dir = Path("/data1/shared/miccai/EndoVis2023/SurgToolLoc/v1.2")
     child_dir_ptn = "*_clip_*"
     seg_dir_name = "mask"
     save_dir_name = "semantic_mask"

@@ -69,14 +69,15 @@ class MMSegInferencer(BaseInferencer):
                  palette: Optional[Union[str, List]] = None,
                  dataset_name: Optional[str] = None,
                  device: Optional[str] = None,
-                 scope: Optional[str] = 'mmseg') -> None:
+                 scope: Optional[str] = 'mmseg',
+                 show_progress: bool = True) -> None:
         # A global counter tracking the number of images processes, for
         # naming of the output images
         self.num_visualized_imgs = 0
         self.num_pred_imgs = 0
         init_default_scope(scope or 'mmseg')
         super().__init__(
-            model=model, weights=weights, device=device, scope=scope)
+            model=model, weights=weights, device=device, scope=scope, show_progress=show_progress)
 
         if device == 'cpu' or not torch.cuda.is_available():
             self.model = revert_sync_batchnorm(self.model)

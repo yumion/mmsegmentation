@@ -1,3 +1,4 @@
 cityscapesscripts
 nibabel
 seaborn
+wandb

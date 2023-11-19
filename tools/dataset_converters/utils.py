@@ -26,7 +26,7 @@ def save_as_palette(parent_dir, child_dir_ptn, seg_dir_name, save_dir_name, cmap
         save_dir.mkdir(parents=True, exist_ok=True)
 
         for label_file in tqdm(video_dir.glob(f"{seg_dir_name}/*{suffix}"), desc=video_dir.name):
-            seg_map = cv2.imread(str(label_file), 0)
-            # seg_map = Image.open(label_file).convert("P")
+            # seg_map = cv2.imread(str(label_file), 0)
+            seg_map = Image.open(label_file).convert("P")
             seg_img = generate_palette(seg_map, cmap, palette)
             seg_img.save(save_dir / label_file.name)

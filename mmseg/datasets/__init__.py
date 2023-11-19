@@ -38,7 +38,7 @@ from .transforms import (CLAHE, AdjustGamma, Albu, BioMedical3DPad,
                          ResizeShortestEdge, ResizeToMultiple, RGB2Gray,
                          SegRescale)
 from .voc import PascalVOCDataset
-from .endovis import EndoVisDataset
+from .endovis import EndoVisDataset, EndoVisSynISSBinaryDataset, EndoVisSynISSDataset
 
 # yapf: enable
 __all__ = [
@@ -60,5 +60,5 @@ __all__ = [
     'MapillaryDataset_v2', 'Albu', 'LEVIRCDDataset',
     'LoadMultipleRSImageFromFile', 'LoadSingleRSImageFromFile',
     'ConcatCDInput', 'BaseCDDataset', 'DSDLSegDataset', 'BDD100KDataset',
-    'EndoVisDataset',
+    'EndoVisDataset', 'EndoVisSynISSBinaryDataset', 'EndoVisSynISSDataset',
 ]

@@ -39,6 +39,7 @@ from .transforms import (CLAHE, AdjustGamma, Albu, BioMedical3DPad,
                          SegRescale)
 from .voc import PascalVOCDataset
 from .endovis import EndoVisDataset, EndoVisSynISSBinaryDataset, EndoVisSynISSDataset
+from .nuvat import NuvatDataset
 
 # yapf: enable
 __all__ = [
@@ -61,4 +62,5 @@ __all__ = [
     'LoadMultipleRSImageFromFile', 'LoadSingleRSImageFromFile',
     'ConcatCDInput', 'BaseCDDataset', 'DSDLSegDataset', 'BDD100KDataset',
     'EndoVisDataset', 'EndoVisSynISSBinaryDataset', 'EndoVisSynISSDataset',
+    'NuvatDataset',
 ]

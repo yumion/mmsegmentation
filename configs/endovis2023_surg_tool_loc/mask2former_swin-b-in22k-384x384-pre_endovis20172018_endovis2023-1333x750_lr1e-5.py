@@ -110,7 +110,9 @@ default_hooks = dict(
     timer=dict(type="IterTimerHook"),
     logger=dict(type="LoggerHook", interval=50, log_metric_by_epoch=True),
     param_scheduler=dict(type="ParamSchedulerHook"),
-    checkpoint=dict(type="CheckpointHook", by_epoch=True, interval=1, max_keep_ckpts=1, save_best="mIoU"),
+    checkpoint=dict(
+        type="CheckpointHook", by_epoch=True, interval=1, max_keep_ckpts=1, save_best="mIoU"
+    ),
     sampler_seed=dict(type="DistSamplerSeedHook"),
     visualization=dict(
         type="SegVisualizationHook",
@@ -154,7 +156,10 @@ custom_keys.update(
     }
 )
 custom_keys.update(
-    {f"backbone.stages.{stage_id}.downsample.norm": backbone_norm_multi for stage_id in range(len(depths) - 1)}
+    {
+        f"backbone.stages.{stage_id}.downsample.norm": backbone_norm_multi
+        for stage_id in range(len(depths) - 1)
+    }
 )
 # optimizer
 optimizer = dict(type="AdamW", lr=0.00001, weight_decay=0.005, eps=1e-8, betas=(0.9, 0.999))
@@ -255,10 +260,20 @@ model = dict(
             num_layers=9,
             layer_cfg=dict(  # Mask2FormerTransformerDecoderLayer
                 self_attn_cfg=dict(  # MultiheadAttention
-                    embed_dims=256, num_heads=8, attn_drop=0.0, proj_drop=0.0, dropout_layer=None, batch_first=True
+                    embed_dims=256,
+                    num_heads=8,
+                    attn_drop=0.0,
+                    proj_drop=0.0,
+                    dropout_layer=None,
+                    batch_first=True,
                 ),
                 cross_attn_cfg=dict(  # MultiheadAttention
-                    embed_dims=256, num_heads=8, attn_drop=0.0, proj_drop=0.0, dropout_layer=None, batch_first=True
+                    embed_dims=256,
+                    num_heads=8,
+                    attn_drop=0.0,
+                    proj_drop=0.0,
+                    dropout_layer=None,
+                    batch_first=True,
                 ),
                 ffn_cfg=dict(
                     embed_dims=256,
@@ -279,7 +294,9 @@ model = dict(
             reduction="mean",
             class_weight=[1.0] * num_classes + [0.1],
         ),
-        loss_mask=dict(type="mmdet.CrossEntropyLoss", use_sigmoid=True, reduction="mean", loss_weight=5.0),
+        loss_mask=dict(
+            type="mmdet.CrossEntropyLoss", use_sigmoid=True, reduction="mean", loss_weight=5.0
+        ),
         loss_dice=dict(
             type="mmdet.DiceLoss",
             use_sigmoid=True,

@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import List, Optional
 
 import mmengine
-from mmengine.logging import print_log
+from mmengine.logging import MMLogger
+from mmseg.registry import DATASETS
 from tqdm import tqdm
 
-from mmseg.registry import DATASETS
 from .basesegdataset import BaseSegDataset
 
 
@@ -120,7 +120,8 @@ class EndoVisDataset(BaseSegDataset):
         assert data_list, f"ERROR: There is no data for loading. Is the data path wrong?: {self.data_root}"
 
         data_list = sorted(data_list, key=lambda x: x["img_path"])
-        print_log(f"Loaded {len(data_list)} images", logger="current", level=logging.INFO)
+        logger = MMLogger.get_current_instance()
+        logger.info(f"Loaded {len(data_list)} images", logger="current", level=logging.INFO)
         return data_list
 
     def dump_annotations(self, dump_path: Path, label_map_file: str = "metainfo.json") -> None:
@@ -133,7 +134,8 @@ class EndoVisDataset(BaseSegDataset):
             writer.writerows(annotations)
         with open(dump_path.parent / label_map_file, "w") as fw:
             json.dump(self._metainfo, fw, indent=4)
-        print_log(f"Dumped annotations to {dump_path}", logger="current", level=logging.INFO)
+        logger = MMLogger.get_current_instance()
+        logger.info(f"Dumped annotations to {dump_path}", logger="current", level=logging.INFO)
 
 
 @DATASETS.register_module()
@@ -250,20 +252,9 @@ class EndoVisSynISSBinaryDataset(BaseSegDataset):
         assert data_list, f"ERROR: There is no data for loading. Is the data path wrong?: {self.data_root}"
 
         data_list = sorted(data_list, key=lambda x: x["img_path"])
-        print_log(f"Loaded {len(data_list)} images", logger="current", level=logging.INFO)
+        logger = MMLogger.get_current_instance()
+        logger.info(f"Loaded {len(data_list)} images", logger="current", level=logging.INFO)
         return data_list
-
-    def dump_annotations(self, dump_path: Path, label_map_file: str = "metainfo.json") -> None:
-        annotations = []
-        for idx in range(len(self)):
-            data_info = self.get_data_info(idx)
-            annotations.append([str(data_info["img_path"]), str(data_info["seg_map_path"])])
-        with open(dump_path, "w") as fw:
-            writer = csv.writer(fw)
-            writer.writerows(annotations)
-        with open(dump_path.parent / label_map_file, "w") as fw:
-            json.dump(self._metainfo, fw, indent=4)
-        print_log(f"Dumped annotations to {dump_path}", logger="current", level=logging.INFO)
 
 
 @DATASETS.register_module()
@@ -399,17 +390,7 @@ class EndoVisSynISSDataset(BaseSegDataset):
         assert data_list, f"ERROR: There is no data for loading. Is the data path wrong?: {self.data_root}"
 
         data_list = sorted(data_list, key=lambda x: x["img_path"])
-        print_log(f"Loaded {len(data_list)} images", logger="current", level=logging.INFO)
+        logger = MMLogger.get_current_instance()
+        logger.info(f"Loaded {len(data_list)} images", logger="current", level=logging.INFO)
         return data_list
 
-    def dump_annotations(self, dump_path: Path, label_map_file: str = "metainfo.json") -> None:
-        annotations = []
-        for idx in range(len(self)):
-            data_info = self.get_data_info(idx)
-            annotations.append([str(data_info["img_path"]), str(data_info["seg_map_path"])])
-        with open(dump_path, "w") as fw:
-            writer = csv.writer(fw)
-            writer.writerows(annotations)
-        with open(dump_path.parent / label_map_file, "w") as fw:
-            json.dump(self._metainfo, fw, indent=4)
-        print_log(f"Dumped annotations to {dump_path}", logger="current", level=logging.INFO)

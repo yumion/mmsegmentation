@@ -120,7 +120,7 @@ class BaseSegDataset(BaseDataset):
 
         # Get label map for custom classes
         new_classes = self._metainfo.get('classes', None)
-        self.label_map = self.get_label_map(new_classes)
+        self.label_map = self.get_label_map(new_classes, self.ignore_index)
         self._metainfo.update(
             dict(
                 label_map=self.label_map,
@@ -147,7 +147,8 @@ class BaseSegDataset(BaseDataset):
 
     @classmethod
     def get_label_map(cls,
-                      new_classes: Optional[Sequence] = None
+                      new_classes: Optional[Sequence] = None,
+                      ignore_index: int = 255,
                       ) -> Union[Dict, None]:
         """Require label mapping.
 
@@ -177,7 +178,7 @@ class BaseSegDataset(BaseDataset):
                     f'subset of classes {old_classes} in METAINFO.')
             for i, c in enumerate(old_classes):
                 if c not in new_classes:
-                    label_map[i] = 255
+                    label_map[i] = ignore_index
                 else:
                     label_map[i] = new_classes.index(c)
             return label_map
@@ -218,7 +219,7 @@ class BaseSegDataset(BaseDataset):
             # return subset of palette
             for old_id, new_id in sorted(
                     self.label_map.items(), key=lambda x: x[1]):
-                if new_id != 255:
+                if new_id != self.ignore_index:
                     new_palette.append(palette[old_id])
             new_palette = type(palette)(new_palette)
         else:
@@ -391,7 +392,7 @@ class BaseCDDataset(BaseDataset):
 
         # Get label map for custom classes
         new_classes = self._metainfo.get('classes', None)
-        self.label_map = self.get_label_map(new_classes)
+        self.label_map = self.get_label_map(new_classes, self.ignore_index)
         self._metainfo.update(
             dict(
                 label_map=self.label_map,
@@ -418,7 +419,8 @@ class BaseCDDataset(BaseDataset):
 
     @classmethod
     def get_label_map(cls,
-                      new_classes: Optional[Sequence] = None
+                      new_classes: Optional[Sequence] = None,
+                      ignore_index: int = 255,
                       ) -> Union[Dict, None]:
         """Require label mapping.
 
@@ -448,7 +450,7 @@ class BaseCDDataset(BaseDataset):
                     f'subset of classes {old_classes} in METAINFO.')
             for i, c in enumerate(old_classes):
                 if c not in new_classes:
-                    label_map[i] = 255
+                    label_map[i] = ignore_index
                 else:
                     label_map[i] = new_classes.index(c)
             return label_map

@@ -32,16 +32,20 @@ class Mask2FormerHead(MMDET_Mask2FormerHead):
         align_corners (bool): align_corners argument of F.interpolate.
             Default: False.
         ignore_index (int): The label index to be ignored. Default: 255.
+        threshold (float): Threshold for binary segmentation in the case of
+            `num_classes==1`. Default: None.
     """
 
     def __init__(self,
                  num_classes,
                  align_corners=False,
                  ignore_index=255,
+                 threshold=0.3,
                  **kwargs):
         super().__init__(**kwargs)
 
         self.num_classes = num_classes
+        self.threshold = threshold
         self.align_corners = align_corners
         self.out_channels = num_classes
         self.ignore_index = ignore_index

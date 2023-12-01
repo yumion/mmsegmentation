@@ -1,7 +1,7 @@
 import csv
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Sequence
 
 import mmengine
 from mmengine.logging import MMLogger
@@ -36,20 +36,17 @@ class NuvatDataset(BaseSegDataset):
 
     """
 
-    METAINFO = dict(
-        classes=("background", "ureter"),
-        palette=[
-            [0, 0, 0],  # background
-            [50, 183, 250],  # ureter
-        ],
-    )
+    METAINFO: dict = {
+        "classes": ["background"],
+        "palette": [[0, 0, 0]],
+    }
 
     def __init__(
         self,
         ann_file: str = "",
         img_suffix: str = ".png",
         seg_map_suffix: str = ".png",
-        classid_map: Optional[dict] = None,
+        label_map: Optional[dict] = None,
         data_root: Optional[str] = None,
         dump_path: Optional[str] = None,
         **kwargs,
@@ -65,7 +62,8 @@ class NuvatDataset(BaseSegDataset):
             **kwargs,
         )
         self.data_root = Path(data_root if data_root is not None else "")
-        self.label_map = self._update_label_map(classid_map)
+        # overwrite label_map
+        self.label_map = label_map
         self._metainfo.update(dict(label_map=self.label_map))
 
         if not kwargs.get("lazy_init", False):
@@ -75,10 +73,10 @@ class NuvatDataset(BaseSegDataset):
             dump_path = Path(dump_path)
             self.dump_annotations(dump_path)
 
-    def _update_label_map(self, classid_map: Optional[dict]) -> Union[Dict, None]:
-        if classid_map is None:
-            return self.label_map
-        return classid_map
+    # ignore checking subset of classes
+    @classmethod
+    def get_label_map(cls, new_classes: Optional[Sequence], ignore_index: int) -> None:
+        return
 
     def load_data_list(self) -> List[dict]:
         """Load annotation from directory or annotation file.

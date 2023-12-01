@@ -70,9 +70,12 @@ def main():
                                 osp.splitext(osp.basename(args.config))[0])
 
     # change dump_path of parent directory to work_dir
-    cfg.train_dataloader.dataset = change_dump_path(cfg.train_dataloader.dataset, cfg.work_dir)
-    cfg.val_dataloader.dataset = change_dump_path(cfg.val_dataloader.dataset, cfg.work_dir)
-    cfg.test_dataloader.dataset = change_dump_path(cfg.test_dataloader.dataset, cfg.work_dir)
+    if cfg.get("train_dataloader") is not None:
+        cfg.train_dataloader.dataset = change_dump_path(cfg.train_dataloader.dataset, cfg.work_dir)
+    if cfg.get("val_dataloader") is not None:
+        cfg.val_dataloader.dataset = change_dump_path(cfg.val_dataloader.dataset, cfg.work_dir)
+    if cfg.get("test_dataloader") is not None:
+        cfg.test_dataloader.dataset = change_dump_path(cfg.test_dataloader.dataset, cfg.work_dir)
 
     # enable automatic-mixed-precision training
     if args.amp is True:

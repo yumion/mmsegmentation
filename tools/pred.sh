@@ -2,7 +2,8 @@ CONFIG=$1
 CHECKPOINT=$2
 NB_GPU=$3
 TARGET_DIR="$4"
-WORK_DIR=$(dirname $CONFIG)
+# WORK_DIR=$(dirname $CONFIG)
+WORK_DIR="${TARGET_DIR%%\**}"
 
 PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
 CUDA_VISIBLE_DEVICES=$NB_GPU \
@@ -11,5 +12,5 @@ python $(dirname "$0")/inference.py \
     $CHECKPOINT \
     0 \
     --target-dir "$TARGET_DIR" \
-    --out $WORK_DIR/endovis2023
+    --out $WORK_DIR
     ${@:5}

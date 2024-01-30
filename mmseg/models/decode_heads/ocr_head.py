@@ -92,12 +92,14 @@ class OCRHead(BaseCascadeDecodeHead):
         ocr_channels (int): The intermediate channels of OCR block.
         scale (int): The scale of probability map in SpatialGatherModule in
             Default: 1.
+        threshold (float): The threshold of probability map in SpatialGatherModule. Default: 0.3.
     """
 
-    def __init__(self, ocr_channels, scale=1, **kwargs):
+    def __init__(self, ocr_channels, scale=1, threshold=0.3, **kwargs):
         super().__init__(**kwargs)
         self.ocr_channels = ocr_channels
         self.scale = scale
+        self.threshold = threshold
         self.object_context_block = ObjectAttentionBlock(
             self.channels,
             self.ocr_channels,
